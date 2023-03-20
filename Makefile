@@ -59,6 +59,7 @@ list.state:
 graph.svg:
 	$(DOCKER_ARGS) $(CONTAINER) terragrunt graph-dependencies | dot -Tsvg > graph.svg
 
+# CI Steps are the same as above, but without docker since we are already running in a container
 validate-ci:
 	terragrunt run-all validate | tee $@
 
