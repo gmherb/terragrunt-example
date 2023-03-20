@@ -14,12 +14,12 @@ DOCKER_ARGS := docker run \
 		--interactive \
 		--rm \
 		--tty \
-		--volume ${HOME}/.aws:/root/.aws \
-		--volume ${HOME}/.ssh:/root/.ssh \
-		--volume ${PWD}:/apps
+		--volume $(HOME)/.aws:/root/.aws \
+		--volume $(HOME)/.ssh:/root/.ssh \
+		--volume $(PWD):/apps
 
 PLAN_FILE_NAME := planfile
-PLAN_FILES := $(shell find . -name ${PLAN_FILE_NAME} | tr '\n' ' ' | awk 'BEGIN{FS=OFS=""}{NF--; print}')
+PLAN_FILES := $(shell find . -name $(PLAN_FILE_NAME) | tr '\n' ' ' | awk 'BEGIN{FS=OFS=""}{NF--; print}')
 
 .PHONY: list
 list:
@@ -29,16 +29,16 @@ validate:
 	$(DOCKER_ARGS) $(CONTAINER) terragrunt run-all validate | tee $@
 
 plan: validate
-	$(DOCKER_ARGS) $(CONTAINER) terragrunt run-all plan -out=${PLAN_FILE_NAME} | tee $@
+	$(DOCKER_ARGS) $(CONTAINER) terragrunt run-all plan -out=$(PLAN_FILE_NAME) | tee $@
 
 apply: plan
-	$(DOCKER_ARGS) $(CONTAINER) terragrunt run-all apply ${PLAN_FILE_NAME} | tee $@
+	$(DOCKER_ARGS) $(CONTAINER) terragrunt run-all apply $(PLAN_FILE_NAME) | tee $@
 
 %.plan: validate
-	$(DOCKER_ARGS) -w /apps/$* $(CONTAINER) terragrunt run-all plan -out=${PLAN_FILE_NAME} | tee $@
+	$(DOCKER_ARGS) -w /apps/$* $(CONTAINER) terragrunt run-all plan -out=$(PLAN_FILE_NAME) | tee $@
 
 %.apply: %.plan
-	$(DOCKER_ARGS) -w /apps/$* $(CONTAINER) terragrunt run-all apply ${PLAN_FILE_NAME} | tee $@
+	$(DOCKER_ARGS) -w /apps/$* $(CONTAINER) terragrunt run-all apply $(PLAN_FILE_NAME) | tee $@
 
 .PHONY: show
 show:
@@ -63,16 +63,16 @@ validate-ci:
 	terragrunt run-all validate | tee $@
 
 plan-ci: validate-ci
-	terragrunt run-all plan -out=${PLAN_FILE_NAME} | tee $@
+	terragrunt run-all plan -out=$(PLAN_FILE_NAME) | tee $@
 
 apply-ci: plan-ci
-	terragrunt run-all apply ${PLAN_FILE_NAME} | tee $@
+	terragrunt run-all apply $(PLAN_FILE_NAME) | tee $@
 
 %.plan-ci: validate-ci
-	cd $*/; terragrunt run-all plan -out=${PLAN_FILE_NAME} | tee $(PWD)/$@
+	cd $*/; terragrunt run-all plan -out=$(PLAN_FILE_NAME) | tee $(PWD)/$@
 
 %.apply-ci: %.plan-ci
-	cd $*/; terragrunt run-all apply ${PLAN_FILE_NAME} | tee $(PWD)/$@
+	cd $*/; terragrunt run-all apply $(PLAN_FILE_NAME) | tee $(PWD)/$@
 
 .PHONY: clean
 clean:
